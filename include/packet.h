@@ -53,6 +53,8 @@ typedef struct rtp_pkt_init_info_t_
 {
     uint_ padding;
     uint_ ext;
+    uint16_t ext_id;
+    uint16_t ext_header_length;
     uint_ csrc_count;
 } rtp_pkt_init_info_t;
 

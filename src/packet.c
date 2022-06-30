@@ -1,6 +1,7 @@
 #include "packet.h"
 #include "allocator.h"
 #include <string.h>
+#include <arpa/inet.h>
 
 typedef enum fields_size_
 {
@@ -92,7 +93,13 @@ rtp_err_t rtp_pkt_init(rtp_pkt_t *pkt, rtp_pkt_init_info_t *info)
         .extension = info->ext ? 0x1 : 0x0;
         .csrc_count = info->csrc_count;
     };
-    memcpy(pkt->data, &head, sizeof(head));
+    memcpy(pkt->header, &head, sizeof(head));
+    if (info->ext) {
+        uint16_t *begin = (uint16_t *)((uint8_t *)pkt->ext_begin -
+                ext_id_size - ext_length_size);
+        begin[0] = htons(info->ext_id);
+        begin[1] = htons(info->ext_header_length);
+    }
     return rtp_err_ok;
 }
 
