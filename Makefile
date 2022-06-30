@@ -1,8 +1,10 @@
-SRC_LIST := general.c
+SRC_LIST := 
+SRC_PATH := src
+INCLUDE_LIST := pay.h depay.h list.h common.h packet.h
+INCLUDE_PATH := include
 
 
-
-COMMONFLAGS += -I./include
+COMMONFLAGS += -I./${INCLUDE_PATH}
 ifndef NDEBUG
     COMMONFLAGS += -Wall -g -O0
     CFLAGS += ${COMMONFLAGS}
@@ -35,3 +37,6 @@ libsilver-broccoli.so: ${SHARE_OBJ_LIST}
 
 %.o: %.cc
 	${CXX} ${CXXFLAGS} -c $^
+
+tags: ./include/*
+	ctags ./include/*
