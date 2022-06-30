@@ -5,8 +5,8 @@
 #define RTP_INIT_ALLOC(p) if (!p) p = rtp_def_alloc
 #define RTP_INIT_DEALLOC(p) if (!p) p = rtp_def_dealloc
 
-typedef void *(*rtp_alloc)(uint_ size);
-typedef void (*rtp_dealloc)(void *ptr);
+typedef void *(*rtp_alloc)(uint_);
+typedef void (*rtp_dealloc)(void *);
 
 void *rtp_def_alloc(uint_ size);
 void rtp_def_dealloc(void *p);
