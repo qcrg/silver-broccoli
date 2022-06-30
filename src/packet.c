@@ -15,14 +15,14 @@ typedef enum fields_size_
 } fields_size;
 
 rtp_pkt_t *rtp_pkt_alloc(rtp_pkt_t *pkt, rtp_pkt_alloc_info_t *info,
-        rtp_alloc *alloc)
+        rtp_alloc alloc)
 {
     RTP_INIT_ALLOC(alloc);
     rtp_pkt_t *res;
     uint_ csrc_h_size, ext_h_size, padding_size, pkt_size;
-    res = pkt ? pkt : alloc(sizeof(*res));
+    res = pkt ? pkt : (rtp_pkt_t *)alloc(sizeof(*res));
     csrc_h_size = info->csrc_count * csrc_size;
-    ext_h_size = info->extension ? ext_id_size + 
+    ext_h_size = info->ext ? ext_id_size + 
         ext_length_size + info->ext_header_length : 0;
     padding_size = info->padding ? 32 - (pkt_header_size +
             csrc_h_size + ext_h_size + info->payload_size) % 32 : 0;
@@ -46,7 +46,7 @@ rtp_pkt_t *rtp_pkt_alloc(rtp_pkt_t *pkt, rtp_pkt_alloc_info_t *info,
         if (info->ext) {
             offset += ext_id_size + ext_length_size;
             res->ext_begin = (uint8_t *)res->data + offset;
-            res->ext_size = info_ext_header_length;
+            res->ext_size = info->ext_header_length;
             offset += res->ext_size;
         } else {
             res->ext_begin = NULL;
@@ -63,22 +63,22 @@ rtp_pkt_t *rtp_pkt_alloc(rtp_pkt_t *pkt, rtp_pkt_alloc_info_t *info,
         }
 
         if (info->padding) {
-            memset(res->data + offset, 0, padding_size);
+            memset((uint8_t*)(res->data) + offset, 0, padding_size);
             offset += padding_size;
-            res->data[offset - 1] = padding_size;
+            ((uint8_t *)(res->data))[offset - 1] = padding_size;
         }
     }
 
     return res;
 }
 
-void rtp_pkt_free(rtp_pkt_t *pkt, rtp_dealloc *dealloc)
+void rtp_pkt_free(rtp_pkt_t *pkt, rtp_dealloc dealloc)
 {
     RTP_INIT_DEALLOC(dealloc);
     dealloc(pkt->data);
 }
 
-void rtp_pkt_destroy(rtp_pkt_t *pkt, rtp_dealloc *dealloc)
+void rtp_pkt_destroy(rtp_pkt_t *pkt, rtp_dealloc dealloc)
 {
     RTP_INIT_DEALLOC(dealloc);
     dealloc(pkt->data);
@@ -89,9 +89,9 @@ rtp_err_t rtp_pkt_init(rtp_pkt_t *pkt, rtp_pkt_init_info_t *info)
 {
     rtp_pkt_header_t head = {
         .version = 0x2,
-        .padding = info->padding ? 0x1 : 0x0;
-        .extension = info->ext ? 0x1 : 0x0;
-        .csrc_count = info->csrc_count;
+        .padding = info->padding ? 0x1 : 0x0,
+        .extension = info->ext ? 0x1 : 0x0,
+        .csrc_count = info->csrc_count
     };
     memcpy(pkt->header, &head, sizeof(head));
     if (info->ext) {
@@ -109,56 +109,9 @@ rtp_err_t rtp_pkt_init(rtp_pkt_t *pkt, rtp_pkt_init_info_t *info)
 #include <unistd.h>
 #include <stdio.h>
 
-#define h(v) printf(#v": %d\n", head->v)
-void print_pkt_header(rtp_pkt_header_t *head)
-{
-    h(version);
-    h(padding);
-    h(extension);
-    h(csrc_count);
-    h(marker);
-    h(payload_type);
-    h(sequence_number);
-    h(timestamp);
-    h(ssrc);
-}
-
-#define p(v) printf(#v": %d\n", ctx->v)
-#define pp(v) printf(#v": %ld\n", (uint8_t *)ctx->v - (uint8_t *)ctx->pkt.data)
-void print_pkt_ctx(rtp_pkt_ctx_t *ctx)
-{
-    pp(csrc_ids_begin);
-    p(csrc_count);
-    pp(ext_header_begin);
-    p(ext_header_id);
-    p(ext_header_length);
-    pp(payload_begin);
-    p(payload_size);
-    printf("pkt.data: %ld\n", ctx->pkt.data - ctx->pkt.data);
-    printf("pkt.size: %d\n", ctx->pkt.size);
-}
-
 int main()
 {
-    rtp_pkt_ctx_create_info_t info = {
-        .payload_size = 8,
-        .padding = 1,
-        .extension = 0,
-        .csrc_count = 0,
-        .ext_header_id = 100,
-        .ext_header_length = 10
-    };
-    rtp_pkt_ctx_t *ctx = rtp_pkt_ctx_create(&info);
 
-    memset(ctx->payload_begin, 0xAA, ctx->payload_size);
-
-    print_pkt_ctx(ctx);
-    printf("\n");
-    print_pkt_header(&ctx->header);
-    printf("\n");
-
-    write(2, ctx->pkt.data, ctx->pkt.size);
-    printf("\n");
     return 0;
 }
 

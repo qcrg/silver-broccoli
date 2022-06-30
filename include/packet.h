@@ -1,14 +1,8 @@
-#ifndef _SILVER_BROCCOLI_COMMON_H
-#define _SILVER_BROCCOLI_COMMON_H
+#ifndef _SILVER_BROCCOLI_PACKET_H
+#define _SILVER_BROCCOLI_PACKET_H
 #include "common.h"
 #include "allocator.h"
 #include <stdint.h>
-
-typedef enum rtp_err_t_
-{
-    rtp_err_ok,
-    rtp_err_undefined
-} rtp_err_t;
 
 typedef struct rtp_pkt_header_t_
 {
@@ -65,10 +59,10 @@ extern "C" {
 #endif//__cplusplus
 
 rtp_pkt_t *rtp_pkt_alloc(rtp_pkt_t *pkt, rtp_pkt_alloc_info_t *info,
-        rtp_alloc *alloc);
+        rtp_alloc alloc);
 rtp_err_t rtp_pkt_init(rtp_pkt_t *pkt, rtp_pkt_init_info_t *info);
-void rtp_pkt_destroy(rtp_pkt_t *pkt, rtp_dealloc *dealloc);
-void rtp_pkt_free(rtp_pkt_t *pkt, rtp_dealloca *dealloc);
+void rtp_pkt_destroy(rtp_pkt_t *pkt, rtp_dealloc dealloc);
+void rtp_pkt_free(rtp_pkt_t *pkt, rtp_dealloc dealloc);
 
 #ifdef  __cplusplus
 }
