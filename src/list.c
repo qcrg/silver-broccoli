@@ -118,7 +118,7 @@ void rtp_list_destroy_back(rtp_list_t *list)
     list->dealloc(rtp_list_pull_back(list));
 }
 
-void rtp_list_free(rtp_list_t *list)
+void rtp_list_clear(rtp_list_t *list)
 {
     rtp_node_list_t *curr = list->begin, *next;
     while (curr) {

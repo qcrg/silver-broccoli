@@ -62,7 +62,9 @@ rtp_pkt_t *rtp_pkt_alloc(rtp_pkt_t *pkt, rtp_pkt_alloc_info_t *info,
         rtp_alloc alloc);
 rtp_err_t rtp_pkt_init(rtp_pkt_t *pkt, rtp_pkt_init_info_t *info);
 void rtp_pkt_destroy(rtp_pkt_t *pkt, rtp_dealloc dealloc);
-void rtp_pkt_free(rtp_pkt_t *pkt, rtp_dealloc dealloc);
+void rtp_pkt_clear(rtp_pkt_t *pkt, rtp_dealloc dealloc);
+
+rtp_pkt_t *rtp_pkt_copy(const rtp_pkt_t *src, rtp_alloc alloc);
 
 #ifdef  __cplusplus
 }
