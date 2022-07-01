@@ -37,7 +37,7 @@ void *rtp_list_get_front(rtp_list_t *list);
 void *rtp_list_get_back(rtp_list_t *list);
 void rtp_list_destroy_front(rtp_list_t *list);
 void rtp_list_destroy_back(rtp_list_t *list);
-void rtp_list_free(rtp_list_t *list);
+void rtp_list_clear(rtp_list_t *list);
 void rtp_list_destroy(rtp_list_t *list);
 
 #ifdef  __cplusplus

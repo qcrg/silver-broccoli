@@ -72,7 +72,7 @@ rtp_pkt_t *rtp_pkt_alloc(rtp_pkt_t *pkt, rtp_pkt_alloc_info_t *info,
     return res;
 }
 
-void rtp_pkt_free(rtp_pkt_t *pkt, rtp_dealloc dealloc)
+void rtp_pkt_clear(rtp_pkt_t *pkt, rtp_dealloc dealloc)
 {
     RTP_INIT_DEALLOC(dealloc);
     dealloc(pkt->data);
@@ -101,6 +101,14 @@ rtp_err_t rtp_pkt_init(rtp_pkt_t *pkt, rtp_pkt_init_info_t *info)
         begin[1] = htons(info->ext_header_length);
     }
     return rtp_err_ok;
+}
+
+rtp_pkt_t  *rtp_pkt_copy(const rtp_pkt_t *src, rtp_alloc alloc)
+{
+    rtp_pkt_t *res = alloc(sizeof(rtp_pkt_t));
+    memcpy(res, src, sizeof(rtp_pkt_t));
+    res->header = res->data = alloc(src->size);
+    return res;
 }
 
 
