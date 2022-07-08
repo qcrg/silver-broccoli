@@ -2,13 +2,6 @@
 #include "list.h"
 #include <string.h>
 
-typedef struct data_t_
-{
-    void *data;
-    uint_ size;
-    uint_ own;
-} data_t;
-
 typedef struct rtp_pay_ctx_t_
 {
     rtp_list_t *data_list;
@@ -33,7 +26,8 @@ rtp_pay_ctx_t *rtp_pay_cxt_create(rtp_pay_ctx_create_info_t *info)
     if (!(res->data_list = rtp_list_create(&list_info)))
         goto fail;
     res->data_offset = 0;
-    res->sample = info->take_sample_own ? info->pkt_sample : rtp_pkt_copy(info->pkt_sample);
+    res->sample = info->take_sample_own ?
+        info->pkt_sample : rtp_pkt_copy(info->pkt_sample);
     if (!res->sample)
         goto fail;
     res->alloc = info->alloc;
@@ -57,12 +51,12 @@ void rtp_pay_ctx_destroy(rtp_pay_ctx_t *ctx)
     ctx->dealloc(ctx);
 }
 
-rtp_err_t rtp_pay_push(rtp_pay_ctx_t *ctx, void *data, uint_ size, uint_ own)
+rtp_err_t rtp_pay_push(rtp_pay_ctx_t *ctx, data_t *data)
 {
     data_t *new = ctx->alloc(sizeof(data_t));
-    new->data = data;
-    new->size = size;
-    new->own = own;
+    new->data = data->data;
+    new->size = data->size;
+    new->own = data->own;
     return rtp_list_push_back(data_list, new);
 }
 

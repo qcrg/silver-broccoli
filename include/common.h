@@ -9,4 +9,11 @@ typedef enum rtp_err_t_
 
 typedef unsigned int uint_;
 
+typedef struct data_t_
+{
+    void *data;
+    uint_ size;
+    uint_ own;
+} data_t;
+
 #endif//_SILVER_BROCCOLI_COMMON_H

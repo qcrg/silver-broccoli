@@ -2,7 +2,6 @@
 #define _SILVER_BROCCOLI_PACKET_H
 #include "common.h"
 #include "allocator.h"
-#include <stdint.h>
 
 typedef struct rtp_pkt_header_t_
 {
@@ -31,6 +30,8 @@ typedef struct rtp_pkt_t_
     void *payload_begin;
     uint_ payload_size;
 
+    uint_ padding_size;
+
     rtp_pkt_header_t *header;
 } rtp_pkt_t;
 
@@ -52,8 +53,6 @@ typedef struct rtp_pkt_init_info_t_
     uint_ csrc_count;
 } rtp_pkt_init_info_t;
 
-
-
 #ifdef  __cplusplus
 extern "C" {
 #endif//__cplusplus
@@ -63,6 +62,8 @@ rtp_pkt_t *rtp_pkt_alloc(rtp_pkt_t *pkt, rtp_pkt_alloc_info_t *info,
 rtp_err_t rtp_pkt_init(rtp_pkt_t *pkt, rtp_pkt_init_info_t *info);
 void rtp_pkt_destroy(rtp_pkt_t *pkt, rtp_dealloc dealloc);
 void rtp_pkt_clear(rtp_pkt_t *pkt, rtp_dealloc dealloc);
+
+rtp_pkt_t *rtp_pkt_parse(data_t data, rtp_alloc alloc);
 
 rtp_pkt_t *rtp_pkt_copy(const rtp_pkt_t *src, rtp_alloc alloc);
 

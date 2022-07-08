@@ -65,7 +65,8 @@ rtp_pkt_t *rtp_pkt_alloc(rtp_pkt_t *pkt, rtp_pkt_alloc_info_t *info,
         if (info->padding) {
             memset((uint8_t*)(res->data) + offset, 0, padding_size);
             offset += padding_size;
-            ((uint8_t *)(res->data))[offset - 1] = padding_size;
+            ((uint8_t *)(res->data))[offset - 1] = padding_size - 1;
+            res->padding_size = padding_size - 1;
         }
     }
 
@@ -109,6 +110,25 @@ rtp_pkt_t  *rtp_pkt_copy(const rtp_pkt_t *src, rtp_alloc alloc)
     memcpy(res, src, sizeof(rtp_pkt_t));
     res->header = res->data = alloc(src->size);
     return res;
+}
+
+rtp_pkt_t *rtp_pkt_parse(data_t data, rtp_alloc alloc)
+{
+    rtp_pkt_t *res;
+    if (!(res = alloc(sizeof(rtp_pkt_t))))
+        return NULL;
+    if (data.own) {
+        res->data = data.data;
+    } else {
+        if (!(res->data = alloc(data.size)))
+            goto fail;
+        
+    }
+
+
+fail:
+    
+    
 }
 
 
