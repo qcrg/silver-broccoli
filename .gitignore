@@ -3,3 +3,5 @@
 /.vscode
 *.swp
 tags
+lib*.a*
+*.o

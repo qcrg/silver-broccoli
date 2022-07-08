@@ -1,12 +1,13 @@
-SRC_LIST := 
+VERSION := 0.0.0
+
 SRC_PATH := src
-INCLUDE_LIST := pay.h depay.h list.h common.h packet.h
+SRC_LIST := $(wildcard ${SRC_PATH}/*.c)
 INCLUDE_PATH := include
+INCLUDE_LIST := $(wildcard ${INCLUDE_PATH}/*.h)
 
-
-COMMONFLAGS += -I./${INCLUDE_PATH}
+COMMONFLAGS += -I./${INCLUDE_PATH} -Wall -Wextra -Wpedantic
 ifndef NDEBUG
-    COMMONFLAGS += -Wall -g -O0
+    COMMONFLAGS += -g -O0
     CFLAGS += ${COMMONFLAGS}
     CXXFLAGS += ${COMMONFLAGS}
 else
@@ -18,12 +19,16 @@ endif
 OBJ_LIST := $(patsubst %.c, %.o, ${SRC_LIST})
 SHARE_OBJ_LIST := $(patsubst %.c, %-share.o, ${SRC_LIST})
 
-all: libsilver-broccoli.a libsilver-broccoli.so
+STATIC_LIB_NAME := libsilver-broccoli.a.${VERSION} 
+SHARED_LIB_NAME := libsilver-broccoli.so.${VERSION}
 
-libsilver-broccoli.a: ${OBJ_LIST}
+all: ${STATIC_LIB_NAME} ${SHARED_LIB_NAME}
+
+
+${STATIC_LIB_NAME}: ${OBJ_LIST}
 	${AR} -cvq $@ $^
 
-libsilver-broccoli.so: ${SHARE_OBJ_LIST}
+${SHARED_LIB_NAME}: ${SHARE_OBJ_LIST}
 	${CC} -shared -o $@ $^
 
 %-share.o: %.c
@@ -38,5 +43,8 @@ libsilver-broccoli.so: ${SHARE_OBJ_LIST}
 %.o: %.cc
 	${CXX} ${CXXFLAGS} -c $^
 
-tags: ./include/*
-	ctags ./include/*
+tags: ${INCLUDE_LIST}
+	ctags $^
+
+clean:
+	${RM} *.o tags *.a* *.so*
