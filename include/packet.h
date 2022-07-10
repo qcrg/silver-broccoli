@@ -62,8 +62,7 @@ extern "C" {
 #endif//__cplusplus
 
 rtp_pkt_t *rtp_pkt_alloc(rtp_pkt_alloc_info_t *info);
-rtp_err_t rtp_pkt_data_init(rtp_pkt_t *pkt,
-        rtp_pkt_data_init_info_t *info);
+rtp_err_t rtp_pkt_data_init(rtp_pkt_t *pkt, rtp_pkt_data_init_info_t *info);
 void rtp_pkt_destroy(rtp_pkt_t *pkt);
 
 rtp_pkt_t *rtp_pkt_copy(const rtp_pkt_t *src);

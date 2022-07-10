@@ -1,15 +1,16 @@
-CFLAGS := -Wall -Wextra -Wpedantic -g -I../include -DUSE_TESTS
+VERSION := 0.0.0
+COMMONFLAGS := -Wall -Wextra -Wpedantic -O0 -ggdb -I../include 
+CFLAGS := ${COMMONFLAGS}
 
-all: list_test
+STATIC_LIB := ../libsilver-broccoli.a.${VERSION}
 
-test: main.cc ../src/packet.c ../src/allocator.c
-	${CXX} -I../include -Wall -Wextra -Wpedantic -g -o $@ $^
+all: main
+
+${STATIC_LIB}:
+	make -C ../
+
+%: %.c ${STATIC_LIB}
+	${CC} ${CFLAGS} -o $@ $< -L. -lsilver-broccoli
 
 clean:
-	${RM} test list_test
-
-
-list_test: ../src/list.c ../src/allocator.c
-	${CC} ${CFLAGS} -o $@ $^
-
-
+	${RM} main

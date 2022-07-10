@@ -12,7 +12,7 @@ typedef struct rtp_pay_ctx_t_
     rtp_allocator_t alctr;
 } rtp_pay_ctx_t;
 
-rtp_pay_ctx_t *rtp_pay_cxt_create(rtp_pay_ctx_create_info_t *info)
+rtp_pay_ctx_t *rtp_pay_ctx_create(rtp_pay_ctx_create_info_t *info)
 {
     rtp_pay_ctx_t *res = info->alctr.alloc(sizeof(rtp_pay_ctx_t));
     if (!res)
