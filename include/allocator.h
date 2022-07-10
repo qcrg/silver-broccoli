@@ -2,13 +2,15 @@
 #define _SILVER_BROCCOLI_ALLOCATOR_H
 #include "common.h"
 
-#define RTP_INIT_ALLOC(p) if (!p) p = rtp_def_alloc
-#define RTP_INIT_DEALLOC(p) if (!p) p = rtp_def_dealloc
-
 typedef void *(*rtp_alloc)(uint_);
 typedef void (*rtp_dealloc)(void *);
 
-void *rtp_def_alloc(uint_ size);
-void rtp_def_dealloc(void *p);
+typedef struct rtp_allocator_t_
+{
+    rtp_alloc alloc;
+    rtp_dealloc dealloc;
+} rtp_allocator_t;
+
+extern rtp_allocator_t rtp_def_allocator;
 
 #endif//_SILVER_BROCCOLI_ALLOCATOR_H

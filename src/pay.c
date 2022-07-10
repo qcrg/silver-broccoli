@@ -9,19 +9,17 @@ typedef struct rtp_pay_ctx_t_
     rtp_pkt_t *sample;
     rtp_pkt_t *small_pkt;
     uint_ curr_seq_num;
-    rtp_alloc alloc;
-    rtp_dealloc dealloc;
+    rtp_allocator_t alctr;
 } rtp_pay_ctx_t;
 
 rtp_pay_ctx_t *rtp_pay_cxt_create(rtp_pay_ctx_create_info_t *info)
 {
-    rtp_pay_ctx_t *res = info->alloc(sizeof(rtp_pay_ctx_t));
+    rtp_pay_ctx_t *res = info->alctr.alloc(sizeof(rtp_pay_ctx_t));
     if (!res)
         return NULL;
     memset(res, 0, sizeof(rtp_pay_ctx_t));
     rtp_list_create_info_t list_info = {
-        .alloc = info->alloc,
-        .dealloc = info->dealloc
+        .alctr= info->alctr
     };
     if (!(res->data_list = rtp_list_create(&list_info)))
         goto fail;
@@ -30,15 +28,14 @@ rtp_pay_ctx_t *rtp_pay_cxt_create(rtp_pay_ctx_create_info_t *info)
         info->pkt_sample : rtp_pkt_copy(info->pkt_sample);
     if (!res->sample)
         goto fail;
-    res->alloc = info->alloc;
-    res->dealloc = info->dealloc;
+    res->alctr = info->alctr;
     return res;
 fail:
-    if (res->sample && res->sample != info->pkt_sample)
+    if (!info->take_sample_own && res->sample)
         rtp_pkt_destroy(res->sample);
     if (res->data_list)
         rtp_list_destroy(res->data_list);
-    info->dealloc(res);
+    info->alctr.dealloc(res);
     return NULL;
 }
 
@@ -48,16 +45,16 @@ void rtp_pay_ctx_destroy(rtp_pay_ctx_t *ctx)
     rtp_pkt_destroy(ctx->sample);
     if (ctx->small_pkt)
         rtp_pkt_destroy(ctx->small_pkt);
-    ctx->dealloc(ctx);
+    ctx->alctr.dealloc(ctx);
 }
 
-rtp_err_t rtp_pay_push(rtp_pay_ctx_t *ctx, data_t *data)
+rtp_err_t rtp_pay_push(rtp_pay_ctx_t *ctx, data_t data)
 {
-    data_t *new = ctx->alloc(sizeof(data_t));
-    new->data = data->data;
-    new->size = data->size;
-    new->own = data->own;
-    return rtp_list_push_back(data_list, new);
+    data_t *new = ctx->alctr.alloc(sizeof(data_t));
+    new->data = data.data;
+    new->size = data.size;
+    new->own = data.own;
+    return rtp_list_push_back(ctx->data_list, new);
 }
 
 rtp_pkt_t *rtp_pay_pull(rtp_pay_ctx_t *ctx)
@@ -69,35 +66,28 @@ rtp_pkt_t *rtp_pay_pull(rtp_pay_ctx_t *ctx)
         uint_ size = pkt->payload_size - remainder;
         if (!ctx->small_pkt || ctx->small_pkt->payload_size != size) {
             if (ctx->small_pkt)
-                ctx->dealloc(ctx->small_pkt);
+                ctx->alctr.dealloc(ctx->small_pkt);
             rtp_pkt_alloc_info_t info = {
                     .csrc_count = pkt->csrc_count,
-                    .ext = pkt->ext,
+                    .ext = pkt->ext_begin ? 1 : 0,
                     .ext_header_length = pkt->ext_size,
                     .padding = pkt->header->padding,
-                    .payload_size = size
+                    .payload_size = size,
+                    .alctr = ctx->alctr
             };
-            ctx->small_pkt = rtp_pkt_alloc(NULL, &info, ctx->alloc);
+            ctx->small_pkt = rtp_pkt_alloc(&info);
             pkt = ctx->small_pkt;
         }
     }
-    memcpy(pkt->payload_begin, data->data + ctx->data_offset,
+    memcpy(pkt->payload_begin, (uint8_t *)data->data + ctx->data_offset,
             pkt->payload_size);
-    pkt->header->sequence_number = curr_seq_num++;
+    pkt->header->sequence_number = ctx->curr_seq_num++;
     if (remainder > 0) {
         ctx->data_offset = 0;
         rtp_list_destroy_front(ctx->data_list);
         if (data->own)
-            ctx->dealloc(data->data);
+            ctx->alctr.dealloc(data->data);
     } else
         ctx->data_offset += pkt->payload_size;
     return pkt;
 }
-
-#ifdef USE_TESTS
-int main(int argc, char **argv)
-{
-    
-    return 0;
-}
-#endif

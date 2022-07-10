@@ -4,24 +4,18 @@
 #include "common.h"
 #include "allocator.h"
 
-typedef struct rtp_node_list_t_
-{
-    void *data;
-    struct rtp_node_list_t_ *next;
-} rtp_node_list_t;
+typedef struct rtp_node_list_t_ rtp_node_list_t;
 
 typedef struct rtp_list_t_
 {
     rtp_node_list_t *begin;
     uint_ count;
-    rtp_alloc alloc;
-    rtp_dealloc dealloc;
+    rtp_allocator_t alctr;
 } rtp_list_t;
 
 typedef struct rtp_list_create_info_t_
 {
-    rtp_alloc alloc;
-    rtp_dealloc dealloc;
+    rtp_allocator_t alctr;
 } rtp_list_create_info_t;
 
 #ifdef  __cplusplus

@@ -7,7 +7,7 @@ INCLUDE_LIST := $(wildcard ${INCLUDE_PATH}/*.h)
 
 COMMONFLAGS += -I./${INCLUDE_PATH} -Wall -Wextra -Wpedantic
 ifndef NDEBUG
-    COMMONFLAGS += -g -O0
+    COMMONFLAGS += -ggdb -O0
     CFLAGS += ${COMMONFLAGS}
     CXXFLAGS += ${COMMONFLAGS}
 else
@@ -22,8 +22,9 @@ SHARE_OBJ_LIST := $(patsubst %.c, %-share.o, ${SRC_LIST})
 STATIC_LIB_NAME := libsilver-broccoli.a.${VERSION} 
 SHARED_LIB_NAME := libsilver-broccoli.so.${VERSION}
 
-all: ${STATIC_LIB_NAME} ${SHARED_LIB_NAME}
 
+
+all: ${STATIC_LIB_NAME} ${SHARED_LIB_NAME}
 
 ${STATIC_LIB_NAME}: ${OBJ_LIST}
 	${AR} -cvq $@ $^
@@ -32,19 +33,22 @@ ${SHARED_LIB_NAME}: ${SHARE_OBJ_LIST}
 	${CC} -shared -o $@ $^
 
 %-share.o: %.c
-	${CC} ${CFLAGS} -c -fPIC $^
+	${CC} ${CFLAGS} -c -fPIC -o $@ $^
 
 %-share.o: %.cc
-	${CXX} ${CXXFLAGS} -c -fPIC $^
+	${CXX} ${CXXFLAGS} -c -fPIC -o $@ $^
 
 %.o: %.c
-	${CC} ${CFLAGS} -c $^
+	${CC} ${CFLAGS} -c -o $@ $^
 
 %.o: %.cc
-	${CXX} ${CXXFLAGS} -c $^
+	${CXX} ${CXXFLAGS} -c -o $@ $^
 
 tags: ${INCLUDE_LIST}
-	ctags $^
+	ctags -o $@ $^
+
+unit-test: ${TARGET}
+	${CC} ${CFLAGS} -DUSE_TESTS -o $@ ${TARGET}
 
 clean:
-	${RM} *.o tags *.a* *.so*
+	${RM} ${SRC_PATH}/*.o tags *.a* *.so* unit-test

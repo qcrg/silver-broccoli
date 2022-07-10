@@ -4,6 +4,8 @@
 typedef enum rtp_err_t_
 {
     rtp_err_ok,
+    rtp_err_memory,
+    rtp_err_data,
     rtp_err_undefined
 } rtp_err_t;
 

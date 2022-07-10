@@ -5,3 +5,4 @@
 tags
 lib*.a*
 *.o
+lib*.so*
