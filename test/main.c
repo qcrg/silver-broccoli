@@ -1,5 +1,6 @@
 #include "depay.h"
 #include "pay.h"
+#include "common.h"
 #include <string.h>
 #include <assert.h>
 
@@ -42,11 +43,15 @@ int main(int argc, char **argv)
     data_t tmp_data = { .data = test_frame, .size = frame_size, 0};
     assert(rtp_err_ok == rtp_pay_push(pay_ctx, tmp_data));
 
+    data_t new_frame;
     for (uint_ i = 0; i < 20; i++) {
         rtp_pkt_t *pkt = rtp_pay_pull(pay_ctx);
         if (pkt) {
             pay_count++;
-        }
+            assert(rtp_err_ok == rtp_depay_push(depay_ctx, rtp_pkt_copy(pkt)));
+            assert(rtp_err_ok == rtp_depay_pull(depay_ctx, &new_frame));
+        } else
+            break;
     }
     uint_ theoretical_pay_count = frame_size / payload_size +
         (frame_size % payload_size ? 1 : 0);

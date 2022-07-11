@@ -60,6 +60,8 @@ rtp_err_t rtp_pay_push(rtp_pay_ctx_t *ctx, data_t data)
 rtp_pkt_t *rtp_pay_pull(rtp_pay_ctx_t *ctx)
 {
     data_t *data = rtp_list_get_front(ctx->data_list);
+    if (!data)
+        return NULL;
     rtp_pkt_t *pkt = ctx->sample;
     int remainder = pkt->payload_size - (data->size - ctx->data_offset);
     if (remainder > 0) {
@@ -84,9 +86,10 @@ rtp_pkt_t *rtp_pay_pull(rtp_pay_ctx_t *ctx)
     pkt->header->sequence_number = ctx->curr_seq_num++;
     if (remainder > 0) {
         ctx->data_offset = 0;
-        rtp_list_destroy_front(ctx->data_list);
+        ctx->curr_seq_num = 0;
         if (data->own)
             ctx->alctr.dealloc(data->data);
+        rtp_list_destroy_front(ctx->data_list);
     } else
         ctx->data_offset += pkt->payload_size;
     return pkt;

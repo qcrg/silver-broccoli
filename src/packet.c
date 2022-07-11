@@ -69,6 +69,7 @@ rtp_pkt_t *rtp_pkt_alloc(rtp_pkt_alloc_info_t *info)
         ((uint8_t *)(res->data))[offset - 1] = padding_size - 1;
         res->padding_size = padding_size - 1;
     }
+    res->alctr = info->alctr;
     return res;
 
 fail:
